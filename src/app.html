@@ -1,0 +1,30 @@
+<template>
+    <require from="bootstrap/dist/css/bootstrap.css"></require>
+    <require from="./style.css"></require>
+  <div class="container-fluid full-height"  id="main">
+  <div class="jumbotron">
+  <h1>Name Registry</h1>
+  <p> Demo distributed application for <a href="">Ethereum</a></p>
+  </div>
+  <div class="row  full-height">
+  <div class="col-md-8">  
+  <nav> 
+      <ul class="nav nav-tabs">
+          <li repeat.for="route of router.navigation" role="presentation" 
+          class="${route.isActive ? 'active': ''}">
+            <a href="${route.href}">${route.title}</a></li>
+        </ul>
+  </nav>
+  <div class="inner-page">
+    <router-view></router-view>
+  </div>
+  </div>
+  <div class="col-md-4 recent-names  full-height">
+    <h2>Recently Registred Names</h2>
+  </div>
+  </div>
+  <div id="status">
+      <div show.bind=" ! client.connected" class="alert alert-danger" role="alert" style="">Not connected!!! Check that Ethereum client is running and serves JSON RPC on port 8545. Try to reload page</div>
+  </div>
+  </div>
+</template>

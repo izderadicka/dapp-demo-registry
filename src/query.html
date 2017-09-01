@@ -1,0 +1,17 @@
+<template>
+        <div class="form-group">
+                <label for="name">Name to look for</label>
+                <input type="text" class="form-control" id="name" 
+                value.bind="name & debounce:850"
+                placeholder="Start typing, value is found as you stop"
+                    >
+        </div>
+        <div class="form-group">
+        
+        <div class="form-group">
+            <label>Value for ${name} is:</label> 
+            &nbsp;
+            <span>${value}</span>
+        </div>
+
+</template>

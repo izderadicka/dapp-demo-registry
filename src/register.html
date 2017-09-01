@@ -1,0 +1,24 @@
+<template>
+    You can register new name for fee of ${fee} ETH
+    <div class="form-group">
+            <label for="name">Name to register</label>
+            <input type="text" class="form-control" id="name" value.bind="name">
+    </div>
+    <div class="form-group">
+            <label for="value">Value for the name</label>
+            <input type="text" class="form-control" id="value" value.bind="value">
+    </div>
+    <div class="form-group">
+            <button type="button" class="btn btn-primary" click.delegate="register()" 
+            disabled.bind="! (name && value) || status">Register</button>
+    </div>
+
+    <div class="alert alert-${alertType}" role="alert" show.bind="status">
+    <button type="button" class="close" aria-label="Close"
+        click.delegate="reset()" show.bind="status.final">
+        <span aria-hidden="true">&times;</span></button>
+        ${status.msg}
+              </div>
+
+
+</template>
