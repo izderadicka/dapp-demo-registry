@@ -1,0 +1,8 @@
+{
+	"id": "demo-names-registry",
+	"name": "Demo Names registry",
+	"description": "My demo/test Dapp",
+	"version": "0.1",
+	"author": "Ivan",
+	"iconUrl": "logo.png"
+}
