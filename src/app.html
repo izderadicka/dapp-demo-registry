@@ -21,10 +21,13 @@
   </div>
   <div class="col-md-4 recent-names  full-height">
     <h2>Recently Registred Names</h2>
+    <ul class="recent-items">
+      <li repeat.for="evt of recent">${evt.args.name}</li>
+    </ul>
   </div>
   </div>
-  <div id="status">
-      <div show.bind=" ! client.connected" class="alert alert-danger" role="alert" style="">Not connected!!! Check that Ethereum client is running and serves JSON RPC on port 8545. Try to reload page</div>
+  <div id="status" show.bind=" ! client.connected">
+      <div  class="alert alert-danger" role="alert" style="">Not connected!!! Check that Ethereum client is running and serves JSON RPC on port 8545. Try to reload page</div>
   </div>
   </div>
 </template>

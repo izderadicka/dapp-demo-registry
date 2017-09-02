@@ -1,6 +1,8 @@
 
 import Web3 from 'web3';
 
+
+// needs to be changed to address of actual contract
 const contractAddress ='0xe97e2f937271826c0Df3347B36d8Ad782eE05FB9';
 const contractABI = [{"constant":false,"inputs":[{"name":"amount","type":"uint256"}],"name":"withdraw","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"key","type":"string"},{"name":"value","type":"string"}],"name":"register","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[{"name":"key","type":"string"}],"name":"query","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"fee","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"key","type":"string"},{"name":"to","type":"address"}],"name":"transfer","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"initialFee","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"name","type":"string"},{"indexed":false,"name":"who","type":"address"}],"name":"Register","type":"event"}];
 
@@ -26,8 +28,8 @@ function toPromise(fn, ...args) {
 }
 
 export class Client {
-    fee = 0;
     constructor() {
+        this.fee = 0;
         let web3;
         if (typeof web3 !== 'undefined') {
             web3 = new Web3(web3.currentProvider);
@@ -48,6 +50,25 @@ export class Client {
                 console.log(`Fee is ${this.fee}`);
                 }
         );
+
+        this._listeners = [];
+        let fromBlock = this.web3.eth.blockNumber-10;
+        this.registry.Register({},{fromBlock, toBlock:'latest'}).watch((err,data) => {
+            if (!err) {
+                console.log(`Got event ${JSON.stringify(data)}`)
+                setTimeout(() => {
+                    for (let l of this._listeners) {
+                        l(data);
+                    }
+                }, 0)
+            }
+        });
+
+        this._listeners = [];
+    }
+
+    addListener(fn) {
+        this._listeners.push(fn);
     }
 
     get connected() {
@@ -68,9 +89,14 @@ export class Client {
     register(name, value) {
         let address = this.web3.eth.accounts[0];
 
-        return toPromise(this.registry.register.sendTransaction, name, value,
+        let sendPromise = toPromise(this.registry.register.sendTransaction, name, value,
             {from: address,
             value: this.fee});
+
+        let receiptPromise = sendPromise.then(txHash => {
+            return toPromise(this.web3.eth.getTransactionReceipt,txHash);
+        })
+        return {send: sendPromise, receipt: receiptPromise};
     }
 
     

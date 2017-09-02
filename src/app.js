@@ -6,6 +6,13 @@ import {Client} from './client';
 export class App {
   constructor(client) {
     this.client=client;
+    this.recent=[];
+
+    this.client.addListener(data => {
+      this.recent.unshift(data);
+      if (this.recent.length> 10)
+        this.recent.pop();
+    })
   }
 
   configureRouter(config, router) {

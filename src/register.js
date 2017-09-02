@@ -31,14 +31,19 @@ export class Register {
 
     register() {
         this.status = {status:"submit", msg: "Sent for signature"}
-        this.client.register(this.name, this.value)
-        .then(v=> {
-            this.status={status:"done", msg:`Transaction ready with hash ${v}`,
-            final:true}
-            
-        })
+        let res = this.client.register(this.name, this.value);
+        res.send.then(v=> {
+            this.status={status:"send", msg:`Transaction send with hash ${v}`}
+        });
+
+        res.receipt.then(r=> {
+            this.status={status:"done", msg:`Transaction confirmed in block ${r.blockNumber}`,
+                final:true};
+        });
+
+        Promise.all([res.send, res.receipt])
         .catch(err => {
-            this.status={status:"fail", msg: `Transaction failed with ${JSON.stringify(err)}`,
+            this.status={status:"fail", msg: `Transaction failed, error: ${JSON.stringify(err)}`,
                         final:true};
             
         })
