@@ -3,7 +3,7 @@ import Web3 from 'web3';
 
 
 // needs to be changed to address of actual contract
-const contractAddress ='0xe97e2f937271826c0Df3347B36d8Ad782eE05FB9';
+const contractAddress ='0x2CdB6AE9F7B24fb636b95d9060ff0D0F20e836D6';
 const contractABI = [{"constant":false,"inputs":[{"name":"amount","type":"uint256"}],"name":"withdraw","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"key","type":"string"},{"name":"value","type":"string"}],"name":"register","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[{"name":"key","type":"string"}],"name":"query","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"fee","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"key","type":"string"},{"name":"to","type":"address"}],"name":"transfer","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"initialFee","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"name","type":"string"},{"indexed":false,"name":"who","type":"address"}],"name":"Register","type":"event"}];
 
 function toPromise(fn, ...args) {
@@ -57,7 +57,7 @@ export class Client {
         );
 
         this._listeners = [];
-        let fromBlock = this.web3.eth.blockNumber-10;
+        let fromBlock = this.web3.eth.blockNumber-10000;
         this.registry.Register({},{fromBlock, toBlock:'latest'}).watch((err,data) => {
             if (!err) {
                 console.log(`Got event ${JSON.stringify(data)}`)
@@ -113,8 +113,26 @@ export class Client {
         });
         // and get reciept
         let receiptPromise = sendPromise.then(txHash => {
-            return toPromise(this.web3.eth.getTransactionReceipt,txHash);
-        })
+            let txSendTime = new Date()
+            return new Promise((resolve, reject)=> {
+                let checkReceipt = () => {
+                this.web3.eth.getTransactionReceipt(txHash,
+                    (err,r) =>{
+                        if (err) {
+                            reject(err)
+                        } else if (r) {
+                            resolve(r)
+                        } else if (new Date() - txSendTime > 60000) {
+                            reject(new Error(`Cannot get receipt for 60 secs, check manually for ${txHash}`));
+                        } else {
+                            window.setTimeout(checkReceipt, 1000);
+                        }
+                    });
+                };
+                checkReceipt();
+            });
+        });
+        
         return {send: sendPromise, receipt: receiptPromise, estimate: estimatePromise};
     }
 
