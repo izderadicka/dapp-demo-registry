@@ -33,6 +33,11 @@ export class Client {
         let web3;
         if (typeof web3 !== 'undefined') {
             web3 = new Web3(web3.currentProvider);
+        }
+        else if (window.location.pathname == "/register/") {
+            // in parity
+            let rpcURL = `${window.location.protocol}//${window.location.host}/rpc/`;
+            web3 = new Web3(new Web3.providers.HttpProvider(rpcURL));
           } else {
             // set the provider you want from Web3.providers
             web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
@@ -88,15 +93,29 @@ export class Client {
 
     register(name, value) {
         let address = this.web3.eth.accounts[0];
-
-        let sendPromise = toPromise(this.registry.register.sendTransaction, name, value,
-            {from: address,
+        // fist estimate gas in local VM
+        let data = this.registry.register.getData(name, value);
+        let estimatePromise = toPromise(this.web3.eth.estimateGas,
+            {
+             to: this.registry.address,
+             data:data,   
+            from: address,
             value: this.fee});
-
+        //then send it to blockchain
+        let sendPromise = estimatePromise
+            .then( (gas) => { 
+            console.log(`Estimate succeded with ${gas}`);
+            return toPromise(this.registry.register.sendTransaction, name, value,
+            {from: address,
+            value: this.fee,
+            gas
+            })
+        });
+        // and get reciept
         let receiptPromise = sendPromise.then(txHash => {
             return toPromise(this.web3.eth.getTransactionReceipt,txHash);
         })
-        return {send: sendPromise, receipt: receiptPromise};
+        return {send: sendPromise, receipt: receiptPromise, estimate: estimatePromise};
     }
 
     

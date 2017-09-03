@@ -39,14 +39,13 @@ export class Register {
         res.receipt.then(r=> {
             this.status={status:"done", msg:`Transaction confirmed in block ${r.blockNumber}`,
                 final:true};
-        });
-
-        Promise.all([res.send, res.receipt])
+        })
         .catch(err => {
-            this.status={status:"fail", msg: `Transaction failed, error: ${JSON.stringify(err)}`,
+            console.log("Register error", err);
+            this.status={status:"fail", msg: `Transaction failed, error: ${err.message || JSON.stringify(err)}`,
                         final:true};
             
-        })
+        });
     }
 
 }

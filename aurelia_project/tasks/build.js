@@ -36,12 +36,18 @@ function onBuild(err, stats) {
   }
 }
 
+function copyParityFiles() {
+  return gulp.src('./parity/*')
+  .pipe(gulp.dest(config.output.path));
+}
+
 function clearDist() {
   return del([config.output.path]);
 }
 
 const build = gulp.series(
   clearDist,
+  copyParityFiles,
   configureEnvironment,
   buildWebpack
 );
