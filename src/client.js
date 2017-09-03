@@ -120,7 +120,7 @@ export class Client {
                     (err,r) =>{
                         if (err) {
                             reject(err)
-                        } else if (r) {
+                        } else if (r && r.blockNumber) {
                             resolve(r)
                         } else if (new Date() - txSendTime > 60000) {
                             reject(new Error(`Cannot get receipt for 60 secs, check manually for ${txHash}`));
